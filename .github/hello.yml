@@ -1,0 +1,4 @@
+Run echo "Hello world!"
+ echo "Hello World!"
+ shell: /usr/bin/bash -e {0}
+Hello World!
