@@ -1,4 +1,4 @@
-name: Hello World!
+name: Hello World Pipeline
 
 on:
   push:
@@ -12,3 +12,7 @@ jobs:
       - name: Say hello
         run: |
           echo "Hello World!"
+
+      - name: Show date and time
+        run: |
+          date
