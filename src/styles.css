@@ -213,3 +213,12 @@ footer {
 .pokemon-type-water {
   --pokemon-type-color: #69f;
 }
+
+.pokemon-image {
+  width: 200px;
+  height: 200px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: 1px solid black; /* Temporary: helps you see if the box exists */
+}
