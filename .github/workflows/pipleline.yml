@@ -6,7 +6,7 @@ on:
       - main
   pull_request:
     branches: [main]
-    types: [opened, synchronize]  
+    types: [opened, synchronize]
 
 jobs:
   simple_deployment_pipeline:
@@ -16,17 +16,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install dependencies 
+      - name: Install dependencies
         run: npm install
       - name: Build
         run: npm run build
       - name: Test
         run: npm test
-
-  deploy:
-    needs: [simple_deployment_pipeline]
-    runs-on: ubuntu-20.04
-    if: ${{ github.event_name == 'push' }}
-    steps:
       - name: Trigger deployment
+        if: ${{ github.event_name == 'push' }}
         run: curl ${{ secrets.RENDER_DEPLOY_HOOK }}
