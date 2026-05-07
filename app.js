@@ -12,7 +12,7 @@ app.get("/health", (req, res) => {
 
 // Exercise 10 & 11: Version check
 app.get("/version", (req, res) => {
-  res.send("1"); // Change this to '2' later to check deployment
+  res.send("2"); // Change this to '2' later to check deployment
 });
 
 app.listen(PORT, () => {

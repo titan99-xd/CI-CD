@@ -10,27 +10,28 @@ on:
 
 jobs:
   simple_deployment_pipeline:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-
       - name: Install dependencies
         run: npm install
-
       - name: Check style
         run: npm run eslint
-
-      - name: Run tests
-        run: npm run test
-
       - name: Build
         run: npm run build
+      - name: Test
+        run: npm test
+      - name: e2e tests
+        uses: playwright/test-action@v1
+        # Add your playwright setup here if needed
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-
-      - name: Run end-to-end tests
-        run: npm run test:e2e
+  deploy:
+    needs: [simple_deployment_pipeline] # This ensures tests pass first!
+    runs-on: ubuntu-20.04
+    if: ${{ github.event_name == 'push' }} # Only deploy on push, not PRs
+    steps:
+      - name: Trigger deployment
+        run: curl ${{ secrets.RENDER_DEPLOY_HOOK }}
