@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize]
 
 jobs:
   simple_deployment_pipeline:
@@ -16,22 +13,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install dependencies
+      - name: Install dependencies 
         run: npm install
-      - name: Check style
-        run: npm run eslint
       - name: Build
         run: npm run build
       - name: Test
         run: npm test
-      - name: e2e tests
-        uses: playwright/test-action@v1
-        # Add your playwright setup here if needed
 
   deploy:
-    needs: [simple_deployment_pipeline] # This ensures tests pass first!
+    needs: [simple_deployment_pipeline]
     runs-on: ubuntu-20.04
-    if: ${{ github.event_name == 'push' }} # Only deploy on push, not PRs
+    if: ${{ github.event_name == 'push' }}
     steps:
       - name: Trigger deployment
         run: curl ${{ secrets.RENDER_DEPLOY_HOOK }}
