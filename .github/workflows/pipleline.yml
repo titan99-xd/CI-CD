@@ -16,24 +16,32 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      
       - name: Install dependencies
         run: npm install
+      
       - name: Check style
         run: npm run eslint
-      - name: Test
+
+      - name: Run tests
         run: npm test
+
       - name: Deploy to production
+        # Exercise 14: Only runs when pushing/merging to main
         if: ${{ github.event_name == 'push' }}
-        run: echo "Replace this with your actual deploy command"
+        run: echo "Deploying to production..."
 
   tag_release:
+    # Exercise 15: Only runs if the deployment pipeline succeeds
     needs: [simple_deployment_pipeline]
     runs-on: ubuntu-latest
+    # Only run this job on pushes/merges to main
     if: ${{ github.event_name == 'push' }}
     steps:
       - uses: actions/checkout@v4
       - name: Bump version and push tag
-        uses: anothrNick/github-tag-action@1.71.0
+        # Using the hash for security as suggested in the text
+        uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: patch

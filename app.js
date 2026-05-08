@@ -12,7 +12,7 @@ app.get("/health", (req, res) => {
 
 // Exercise 10 & 11: Version check
 app.get("/version", (req, res) => {
-  res.send("3"); ' later to check deployment of version 3
+  res.send("3"); // Fixed syntax: used // for the comment
 });
 
 app.listen(PORT, () => {
