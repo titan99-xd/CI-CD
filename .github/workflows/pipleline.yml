@@ -4,25 +4,57 @@ on:
   push:
     branches:
       - main
+
   pull_request:
     branches: [main]
     types: [opened, synchronize]
 
 jobs:
   simple_deployment_pipeline:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
+
       - name: Install dependencies
         run: npm install
-      - name: Build
-        run: npm run build
-      - name: Test
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests
         run: npm test
-      - name: Trigger deployment
-        # ONLY deploy if this is a push (merge) to main
-        if: ${{ github.event_name == 'push' }}
-        run: curl ${{ secrets.RENDER_DEPLOY_HOOK }}
+
+      - name: Build project
+        run: npm run build
+
+      - name: Deploy
+        if: |
+          github.event_name == 'push' &&
+          !contains(join(github.event.commits.*.message), '#skip')
+        run: npm run deploy
+
+  tag_release:
+    needs: [simple_deployment_pipeline]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Bump version and push tag
+        if: |
+          github.event_name == 'push' &&
+          !contains(join(github.event.commits.*.message), '#skip')
+
+        uses: anothrNick/github-tag-action@1.75.0
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: patch
