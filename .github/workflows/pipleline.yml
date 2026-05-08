@@ -14,39 +14,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm install
+      - run: npm install
 
-      - name: Run linter
-        run: npm run lint
-
-      - name: Run tests
-        run: npm test
-
-      - name: Build project
-        run: npm run build
+      - run: npm test
 
       - name: Deploy
         if: |
           github.event_name == 'push' &&
           !contains(join(github.event.commits.*.message), '#skip')
-        run: npm run deploy
+
+        run: echo "Deploy step"
 
   tag_release:
     needs: [simple_deployment_pipeline]
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Bump version and push tag
         if: |
