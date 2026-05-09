@@ -1,18 +1,18 @@
-const express = require("express");
-const app = express();
+const express = require('express')
+const app = express()
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5001
 
-app.use(express.static("dist"));
+app.use(express.static('dist'))
 
-app.get("/health", (req, res) => {
-  res.send("ok");
-});
+app.get('/health', (req, res) => {
+  res.send('ok')
+})
 
-app.get("/version", (req, res) => {
-  res.send("3");
-});
+app.get('/version', (req, res) => {
+  res.send('3')
+})
 
 app.listen(PORT, () => {
-  console.log(`server started on port ${PORT}`);
-});
+  console.log(`server started on port ${PORT}`)
+})
