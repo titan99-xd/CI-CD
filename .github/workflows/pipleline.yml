@@ -26,6 +26,19 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy   
-        if: ${{ github.event_name == 'push' }}   # ← ADD THIS LINE
-        run: npm run deploy 
+      - name: Deploy
+        if: ${{ github.event_name == 'push' }}
+        run: npm run deploy
+
+  tag_release:
+    needs: [simple_deployment_pipeline]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bump version and push tag
+        if: ${{ github.event_name == 'push' }}
+        uses: anothrNick/github-tag-action@1.75.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: patch
