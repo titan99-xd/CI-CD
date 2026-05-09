@@ -9,7 +9,7 @@ on:
     types: [opened, synchronize]
 
 jobs:
-  simple_deployment_pipeline:
+  lint_and_test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,35 +23,33 @@ jobs:
       - name: Test
         run: npm run test
 
+  build:
+    needs: [lint_and_test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm install
+
       - name: Build
         run: npm run build
+
+  deploy:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm install
 
       - name: Deploy
         if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
         run: npm run deploy
 
-      - name: Notify success
-        if: ${{ success() && github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
-        uses: rjstone/discord-webhook-notify@v1
-        with:
-          severity: info
-          details: A new version deployed successfully!
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
-
-      - name: Notify failure
-        if: ${{ failure() }}
-        uses: rjstone/discord-webhook-notify@v1
-        with:
-          severity: error
-          details: |
-            Build failed!
-            Commit: ${{ github.event.head_commit.url }}
-            Author: ${{ github.event.head_commit.author.name }}
-            Message: ${{ github.event.head_commit.message }}
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
-
   tag_release:
-    needs: [simple_deployment_pipeline]
+    needs: [deploy]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -62,3 +60,27 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: patch
+
+  notify_success:
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    if: ${{ success() && github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
+    steps:
+      - name: Notify success
+        uses: Ilshidur/action-discord@0.3.2
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: 'A new version deployed successfully!'
+
+  notify_failure:
+    needs: [lint_and_test, build, deploy]
+    runs-on: ubuntu-latest
+    if: ${{ failure() }}
+    steps:
+      - name: Notify failure
+        uses: Ilshidur/action-discord@0.3.2
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: 'Build failed! Commit: ${{ github.event.head_commit.url }} Author: ${{ github.event.head_commit.author.name }} Message: ${{ github.event.head_commit.message }}'
